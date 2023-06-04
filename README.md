@@ -1,2 +1,2 @@
-# twitter_archiver
+# Twitter Archiver
 Twitter Thread Archiver using Selenium
