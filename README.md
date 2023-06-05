@@ -11,7 +11,6 @@
 * cpanm JSON
 * cpanm Encode
 * cpanm HTTP::Request::Common
-* cpanm HTTP::Headers
 * cpanm Digest::SHA
 * cpanm File::Path
 - You'll need Google Chrome installed, and the Chrome Driver corresponding to your OS & version, available here: https://chromedriver.chromium.org/downloads, placed in your project root folder.
