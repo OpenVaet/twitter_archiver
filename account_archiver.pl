@@ -79,7 +79,6 @@ my $url_search = "https://twitter.com/search?q=from\%3A$profile_to_archive&src=t
 $driver->get($url_search);
 sleep 6;
 
-# RobinetteGoneWY
 # Fetch tweets in page.
 my $former_found       = 0;
 my $tweets_found       = 0;
@@ -124,10 +123,10 @@ for my $tweet_incr (sort{$b <=> $a} keys %tweets_by_inc) {
 	# Identifying if we have an avatar for the user.
 	my $tweet_avatar   = $tweet->look_down("data-testid"=>"Tweet-User-Avatar");
 	if ($tweet_avatar) {
-		my ($user_alias, $user_pic) = alias_and_picture_from_tweet($tweet);
-		my ($userName, $tweet_date) = name_and_date_from_tweet($tweet);
-		my $tweet_text              = $tweet->look_down("data-testid"=>"tweetText");
-		my @tweet_media             = $tweet->look_down("data-testid"=>"tweetPhoto");
+		my ($user_alias, $user_pic)  = alias_and_picture_from_tweet($tweet);
+		my ($user_name, $tweet_date) = name_and_date_from_tweet($tweet);
+		my $tweet_text               = $tweet->look_down("data-testid"=>"tweetText");
+		my @tweet_media              = $tweet->look_down("data-testid"=>"tweetPhoto");
 
 		# Fetching the tweet URL.
 		(my $tweet_url, $tweet_date) = parse_tweet_url($tweet, $tweet_date);
@@ -205,15 +204,16 @@ sub parse_tweets {
     my $tree    = HTML::Tree->new();
     $tree->parse($content);
     my @tweets  = $tree->look_down("data-testid" => "cellInnerDiv");
-    for my $i (reverse 0..$#tweets) {
+    for my $i (reverse 0 .. $#tweets) {
         my $tweet_data = $tweets[$i];
 
 		# Fetching the tweet URL.
 		my ($tweet_url) = parse_tweet_url($tweet_data);
+		next unless $tweet_url;
         unless (exists $tweet_sha{$tweet_url}) {
             $tweet_incr++;
             $tweet_sha{$tweet_url}->{'tweet_incr'} = $tweet_incr;
-            $tweet_sha{$tweet_url}->{'tweet'}     = $tweet_data;
+            $tweet_sha{$tweet_url}->{'tweet'}      = $tweet_data;
         }
     }
     $tweets_found = keys %tweet_sha;
@@ -378,9 +378,11 @@ sub parse_tweet_url {
 			$tweet_date = $link->as_trimmed_text;
 		}
 	}
-	$tweet_url =~ s/\/analytics$//;
-	$tweet_url = $twitter_url_base . $tweet_url;
-	return ($tweet_url, $tweet_date);
+	if ($tweet_url) {
+		$tweet_url =~ s/\/analytics$//;
+		$tweet_url = $twitter_url_base . $tweet_url;
+		return ($tweet_url, $tweet_date);
+	}
 }
 
 sub download_video {
@@ -421,6 +423,8 @@ sub download_video {
 	    }
 
 		getstore($videoUrl, $localFile) or die "failed to store [$localFile]";
+
+		sleep 20;
 	}
 	return $localFile;
 }
